@@ -1,0 +1,9 @@
+.grid{
+    width:100%;
+    height:100%;
+}
+
+.grid>div{
+    width: calc(100% / 3);
+    border: 1px solid black;
+}
