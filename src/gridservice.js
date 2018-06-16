@@ -6,21 +6,21 @@ class GridService {
     }
 
     calc(src, dir){
-        
+        console.log(src,dir)
         let res = [];
 
         res[0] = src[0] + dir[0];
         res[1] = src[1] + dir[1];
-        console.log("before check", res);
-        return this.check(res)
+
+        return this.check(res, src)
     }
 
-    check(coord){
+    check(coord, src){
         if(coord[0] <= 2 && coord[1] <= 2){
             return coord;
         }
         else{
-            return [-1,-1];
+            return src;
         }
     }
 }

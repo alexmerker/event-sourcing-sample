@@ -10,6 +10,7 @@ class Vehicle {
         this.eventstore = p_eventstore;
         this.gridsrv = new GridService();
         this.state = new State();
+        
         this.start(start);
     }
 
@@ -17,9 +18,8 @@ class Vehicle {
         
         //Persist application state (memory)
         this.state.set_coordinates(coords);
-        
         const event = {
-            "coords":start
+            "coordinates":coords
         }
         
         //Persist event to the eventstore
@@ -27,16 +27,28 @@ class Vehicle {
     }
 
     move(dir){
-
-        //Persist application state (memory)
-        this.state = this.gridsrv.calc(this.state, dir)
-
+        //Calculate and persist new application state (memory)
+        this.state.set_coordinates(this.gridsrv.calc(this.state.coordinates, dir));
+        
         const event = {
             "direction":dir
         }
 
         //Persist event to the eventstore
         this.eventstore.log("move", event);
+    }
+
+    crash(culprit){
+        
+        //Persist application state (memory) - vehicle has crashed!
+        this.state.set_crash(culprit);
+
+        const event = {
+            "culprit":culprit
+        }
+
+        //Persist event to the eventstore
+        this.eventstore.log("crashed", event);
     }
 
     get_state(){
