@@ -1,6 +1,35 @@
 "use strict"
 
+class Eventstore{
 
-// function* replay{
+    constructor(){
+        this.time = 0;
+        this.store = [];
+    }
 
-// }
+    log(type, diff){
+        let event = {
+            "type":type,
+            "state_change": diff,
+            "time":this.gettime()
+        }
+        
+        this.store.push(event)
+    }
+
+    gettime(){
+        this.time++;
+        return (this.time);
+    }
+
+    getstore(){
+        return this.store;
+    }
+
+    setstore(store){
+        this.store = store;
+    }
+}
+
+module.exports = Eventstore;
+
