@@ -7,35 +7,16 @@ var Eventstore = require('./eventstore');
 var eventstore = new Eventstore();
 
 var Vehicle = require('./vehicle');
-var vehicle = new Vehicle(eventstore);
+var vehicle = new Vehicle(eventstore, [0,0]);
 
 app.get('/', function(req, res){
    res.send("Hello world!");
 });
 
-//PARAM: sourcefield = [0,1]
-app.get('/left/:sourcefield', (req, res) => {
-    let sourcefield = JSON.parse(req.params.sourcefield)
-    vehicle.left(sourcefield);
-    res.send("Driver! LEFT!");
-});
-
-app.get('/right/:sourcefield', (req, res) => {
-    let sourcefield = JSON.parse(req.params.sourcefield)
-    vehicle.right(sourcefield);
-    res.send("Driver! RIGHT!");
-});
-
-app.get('/up/:sourcefield', (req, res) => {
-    let sourcefield = JSON.parse(req.params.sourcefield)
-    vehicle.up(sourcefield);
-    res.send("Driver! UP!");
-});
-
-app.get('/down/:sourcefield', (req, res) => {
-    let sourcefield = JSON.parse(req.params.sourcefield)
-    vehicle.down(sourcefield);
-    res.send("Driver! DOWN!");
+app.get('/move/:direction', (req,res) => {
+    let direction = JSON.parse(req.params.direction)
+    vehicle.move(direction)
+    res.send("Drivin along");
 });
 
 app.get('/get-events', (req, res) => {

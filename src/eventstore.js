@@ -7,32 +7,14 @@ class Eventstore{
         this.store = [];
     }
 
-    log(type, from_field, to_field){
-        var event;
-
-        console.log("type", type, " ff", from_field, " tf", to_field)
-
-        if(type === "start"){
-            event = {
-                "type":type,
-                "field":from_field,
-                "time":this.gettime()
-            }
-        }
-        else{
-            event = {
-                "type":type,
-                "from_field":from_field,
-                "to_field":to_field,
-                "time":this.gettime()
-            }
+    log(type, diff){
+        let event = {
+            "type":type,
+            "state_change": diff,
+            "time":this.gettime()
         }
         
         this.store.push(event)
-    }
-
-    getstate(){
-
     }
 
     gettime(){

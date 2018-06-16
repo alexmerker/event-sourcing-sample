@@ -2,37 +2,45 @@
 
 var Eventstore = require('./eventstore');
 var GridService = require('./gridservice');
+var State = require('./state');
 
 class Vehicle {
 
-    constructor(p_eventstore){
-        this.eventstore = p_eventstore
+    constructor(p_eventstore, start){
+        this.eventstore = p_eventstore;
         this.gridsrv = new GridService();
-        this.start();
+        this.state = new State();
+        this.start(start);
     }
 
-    start(){
-        this.eventstore.log("start", [0,0]);
+    start(coords){
+        
+        //Persist application state (memory)
+        this.state.set_coordinates(coords);
+        
+        const event = {
+            "coords":start
+        }
+        
+        //Persist event to the eventstore
+        this.eventstore.log("start", event);
     }
 
-    left(src){
-        let tofield = this.gridsrv.calc(src, [-1,0])
-        this.eventstore.log("left", src, tofield)
+    move(dir){
+
+        //Persist application state (memory)
+        this.state = this.gridsrv.calc(this.state, dir)
+
+        const event = {
+            "direction":dir
+        }
+
+        //Persist event to the eventstore
+        this.eventstore.log("move", event);
     }
 
-    right(src){
-        let tofield = this.gridsrv.calc(src, [1,0])
-        this.eventstore.log("right", src, tofield)
-    }
-
-    up(src){
-        let tofield = this.gridsrv.calc(src, [0,-1])
-        this.eventstore.log("up", src, tofield)
-    }
-
-    down(src){
-        let tofield = this.gridsrv.calc(src, [0,1])
-        this.eventstore.log("down", src, tofield)
+    get_state(){
+        return this.state.get_state();
     }
 } 
 
