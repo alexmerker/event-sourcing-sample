@@ -40,4 +40,14 @@ app.get('/crash/:culprit', (req, res) => {
   res.send(vehicle.get_state());
 });
 
+app.get('/reset', (req, res) => {
+  vehicle.reset();
+  res.send(vehicle.get_state());
+});
+
+// app.get('/replay', (req, res) => {
+//   vehicle.replay() eventstore.
+//   res.send(vehicle.get_state());
+// });
+
 app.listen(13377);

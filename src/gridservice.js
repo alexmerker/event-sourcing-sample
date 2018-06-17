@@ -11,7 +11,8 @@ class GridService {
     res[0] = pos[0] + dir[0];
     res[1] = pos[1] + dir[1];
 
-    return this.position_is_valid(res) ? res : pos;
+    // return this.position_is_valid(res) ? res : pos;
+    return res;
   }
 
   position_is_valid(pos) {

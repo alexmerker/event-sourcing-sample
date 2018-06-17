@@ -10,8 +10,8 @@
 
 <body onload="load()">
     <div id="wrapper">
-        <div class="header">
-            <input type="range" min="1" max="100" value="50" class="slider" id="myRange">
+        <div id="header" class="header">
+            <!-- <input type="range" min="1" max="100" value="50" class="slider" id="myRange"> -->
         </div>
         <div>
             <div class="leftpanel">
@@ -33,7 +33,8 @@
                     </div>
                 </div>
             </div>
-            <div class="rightpanel">Events Store curr state
+            <div class="rightpanel">
+                <pre id="eventLog"></pre>
             </div>
         </div>
     </div>
