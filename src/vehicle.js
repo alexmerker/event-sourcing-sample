@@ -16,6 +16,7 @@ class Vehicle {
   start(coords) {
     //Persist application state (memory)
     this.state.set_coordinates(coords);
+
     const event = {
       coordinates: coords
     };
@@ -24,9 +25,9 @@ class Vehicle {
     this.eventstore.log('start', event);
   }
 
-  move(dir) {
+  move(pos, dir) {
     //Calculate and persist new application state (memory)
-    this.state.set_coordinates(this.gridsrv.calc(this.state.coordinates, dir));
+    this.state.set_coordinates(this.gridsrv.calc(pos, dir));
 
     const event = {
       direction: dir
