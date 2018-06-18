@@ -42,34 +42,38 @@ function replay(events, pointInTime) {
     pointInTime = events.length;
   }
 
-  let replayState = {
+  let resetState = {
     position: null,
     crash: [],
     location: []
   };
+  state = resetState;
 
   let time = 0;
 
   events.slice(0, pointInTime).forEach(event => {
+    console.log(state);
+    console.log(event);
+
     if (event.type === 'teleport') {
-      replayState.position = event.position;
+      teleport(event.position);
       time += 1000;
     } else if (event.type === 'crash') {
       crash(event.culprit);
     } else if (event.type === 'move') {
-      replayState;
+      move(event.step);
       time += 1000;
     } else if (event.type === 'reachedLocation') {
-      replayState.locations.push(event.location);
+      reachedLocation(event.location);
     }
-    animateMove(replayState.position, time);
-    animateState(replayState, time);
-  });
 
-  return replayState;
+    animateMove(state.position, time);
+    animateState(state, time);
+  });
 }
 
 function addToEventlog(event) {
+  event.time = eventLog.length + 1;
   eventLog.push(event);
 }
 
@@ -77,8 +81,6 @@ function animateState(state, delay) {
   const _state = Object.assign({}, state);
   let timedPromise = new Promise((resolve, reject) => {
     let wait = setTimeout(() => {
-      console.log('thisstate', state);
-      console.log('updated state', _state);
       updateState(_state);
     }, delay);
   });
@@ -131,26 +133,26 @@ function setState(newState) {
 
 function crash(culprit) {
   state.crash = culprit;
-  addToEventlog({ type: 'crash', culprit: culprit });
+  return { type: 'crash', culprit: culprit };
 }
 
 function reachedLocation(location) {
-  state.reachedLocation = location;
-  addToEventlog({ type: 'reachedLocation', location: location });
+  state.location = location;
+  return { type: 'reachedLocation', location: location };
 }
 
 function move(step) {
   state.position = calcPosition(state.position, step);
-  addToEventlog({ type: 'move', step: step });
+  return { type: 'move', step: step };
 }
 
 function teleport(position) {
   state.position = position;
-  addToEventlog({ type: 'teleport', position: position });
+  return { type: 'teleport', position: position };
 }
 
 function load() {
-  teleport(state.position);
+  addToEventlog(teleport(state.position));
   moveBusEmoji(state.position);
   updateEventLog(eventLog);
   updateState(state);
@@ -168,28 +170,28 @@ function keyboardcontrol(event) {
   // left
   if (event.which == 37) {
     console.log('left', [-1, 0]);
-    move([-1, 0]);
+    addToEventlog(move([-1, 0]));
     moveBusEmoji(state.position);
   }
 
   // up
   if (event.which == 38) {
     console.log('up', [0, -1]);
-    move([0, -1]);
+    addToEventlog(move([0, -1]));
     moveBusEmoji(state.position);
   }
 
   // right
   if (event.which == 39) {
     console.log('right', [1, 0]);
-    move([1, 0]);
+    addToEventlog(move([1, 0]));
     moveBusEmoji(state.position);
   }
 
   // down
   if (event.which == 40) {
     console.log('down', [0, 1]);
-    move([0, 1]);
+    addToEventlog(move([0, 1]));
     moveBusEmoji(state.position);
   }
 
@@ -202,6 +204,8 @@ document.addEventListener('keydown', keyboardcontrol);
 /* render game */
 
 function moveBusEmoji(newpos) {
+  console.log(newpos);
+
   // clear the squares
   document.querySelectorAll('.square').forEach(square => {
     square.innerHTML = square.innerHTML.replace('🚌', '');
@@ -218,10 +222,11 @@ function moveBusEmoji(newpos) {
     el.innerHTML = '🚌';
   } else if (el.innerHTML === '🚩') {
     delete state.crash;
-    reachedLocation(el.innerHTML);
+    addToEventlog(reachedLocation(el.innerHTML));
     el.innerHTML = el.innerHTML + '🎉' + '🚌';
   } else {
-    crash(el.innerHTML);
+    delete state.location;
+    addToEventlog(crash(el.innerHTML));
     el.innerHTML = el.innerHTML + '💥' + '🚌';
   }
   return newpos;
