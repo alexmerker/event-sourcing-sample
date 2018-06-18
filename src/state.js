@@ -2,6 +2,7 @@
 
 class State {
     constructor(){
+        this.crash = [];
     }
 
     set_coordinates(coords){
@@ -9,7 +10,7 @@ class State {
     }
 
     set_crash(crashed){
-        this.crash = crashed; 
+        this.crash.push(crashed); 
     }
 
     get_state(){

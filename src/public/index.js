@@ -1,6 +1,6 @@
 var state = { coordinates: [0, 0] };
 
-document.addEventListener('keydown', function(event) {
+document.addEventListener('keydown', function (event) {
   // console.log(event.which);
   if (event.which == 82) {
     console.log('R');
@@ -111,11 +111,50 @@ function moveBusEmoji(newpos) {
   updateState();
 }
 
+function getReplayData(time) {
+  return new Promise((resolve, reject) => {
+    if (time === undefined) {
+      resolve(getReplay());
+    }
+    else {
+      resolve(getReplayAtTime(time));
+    }
+  });
+}
+
+// function animateReplay(time) {
+//   getReplayData(time).then((data) => {
+//     if (data === undefined) {
+//       time = data.length;
+//     }
+//     return new Promise((resolve, reject) => {
+//       let evstore = this.events;
+//       resolve(this._animateReplay(function* iterable() {
+
+//         //Fill with move values
+//         for (let i = 1; i < time; i++) {
+//           //data.
+
+//           // let el = evstore[i].state_change.direction;
+//           // let cr = evstore[i].state_change.culprit;
+//           // if (el) {
+//           //   yield el;
+//           // } else if (cr) {
+//           //   yield cr;
+//           // }
+//         }
+//       }));
+//     });
+
+
+//   })
+// }
+
 function getEvents() {
   return new Promise((resolve, reject) => {
     var xmlhttp = new XMLHttpRequest();
 
-    xmlhttp.onreadystatechange = function() {
+    xmlhttp.onreadystatechange = function () {
       if (xmlhttp.readyState == XMLHttpRequest.DONE) {
         // XMLHttpRequest.DONE == 4
         if (xmlhttp.status == 200) {
@@ -137,7 +176,7 @@ function getState() {
   return new Promise((resolve, reject) => {
     var xmlhttp = new XMLHttpRequest();
 
-    xmlhttp.onreadystatechange = function() {
+    xmlhttp.onreadystatechange = function () {
       if (xmlhttp.readyState == XMLHttpRequest.DONE) {
         // XMLHttpRequest.DONE == 4
         if (xmlhttp.status == 200) {
@@ -159,7 +198,7 @@ function move(dir) {
   return new Promise((resolve, reject) => {
     var xmlhttp = new XMLHttpRequest();
 
-    xmlhttp.onreadystatechange = function() {
+    xmlhttp.onreadystatechange = function () {
       if (xmlhttp.readyState == XMLHttpRequest.DONE) {
         // XMLHttpRequest.DONE == 4
         if (xmlhttp.status == 200) {
@@ -183,7 +222,7 @@ function crash(culprit) {
   return new Promise((resolve, reject) => {
     var xmlhttp = new XMLHttpRequest();
 
-    xmlhttp.onreadystatechange = function() {
+    xmlhttp.onreadystatechange = function () {
       if (xmlhttp.readyState == XMLHttpRequest.DONE) {
         // XMLHttpRequest.DONE == 4
         if (xmlhttp.status == 200) {
@@ -205,7 +244,7 @@ function start() {
   return new Promise((resolve, reject) => {
     var xmlhttp = new XMLHttpRequest();
 
-    xmlhttp.onreadystatechange = function() {
+    xmlhttp.onreadystatechange = function () {
       if (xmlhttp.readyState == XMLHttpRequest.DONE) {
         if (xmlhttp.status == 200) {
           resolve(JSON.parse(xmlhttp.responseText));
@@ -226,7 +265,7 @@ function resetVehicle() {
   return new Promise((resolve, reject) => {
     var xmlhttp = new XMLHttpRequest();
 
-    xmlhttp.onreadystatechange = function() {
+    xmlhttp.onreadystatechange = function () {
       if (xmlhttp.readyState == XMLHttpRequest.DONE) {
         if (xmlhttp.status == 200) {
           resolve(JSON.parse(xmlhttp.responseText));
@@ -239,6 +278,48 @@ function resetVehicle() {
     };
 
     xmlhttp.open('GET', '/reset', true);
+    xmlhttp.send();
+  });
+}
+
+function getReplayAtTime(timer) {
+  return new Promise((resolve, reject) => {
+    var xmlhttp = new XMLHttpRequest();
+
+    xmlhttp.onreadystatechange = function () {
+      if (xmlhttp.readyState == XMLHttpRequest.DONE) {
+        if (xmlhttp.status == 200) {
+          resolve(JSON.parse(xmlhttp.responseText));
+        } else if (xmlhttp.status == 400) {
+          reject('400');
+        } else {
+          reject('unknown error');
+        }
+      }
+    };
+
+    xmlhttp.open('GET', '/replayState/' + timer, true);
+    xmlhttp.send();
+  });
+}
+
+function getReplay() {
+  return new Promise((resolve, reject) => {
+    var xmlhttp = new XMLHttpRequest();
+
+    xmlhttp.onreadystatechange = function () {
+      if (xmlhttp.readyState == XMLHttpRequest.DONE) {
+        if (xmlhttp.status == 200) {
+          resolve(JSON.parse(xmlhttp.responseText));
+        } else if (xmlhttp.status == 400) {
+          reject('400');
+        } else {
+          reject('unknown error');
+        }
+      }
+    };
+
+    xmlhttp.open('GET', '/replayState', true);
     xmlhttp.send();
   });
 }

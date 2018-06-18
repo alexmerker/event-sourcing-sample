@@ -21,8 +21,12 @@ class ReplayService {
                 //Starting at 1, the "start" event will be handled seperately
                 for (let i = 1; i < (time); i++) {
                     let el = evstore[i].state_change.direction;
-                    if (el)
+                    let cr = evstore[i].state_change.culprit;
+                    if (el){
                         yield el;
+                    }else if(cr){
+                        yield cr;
+                    }
                 }
             }));
         });
@@ -43,10 +47,16 @@ class ReplayService {
                     return(application_state);
                     break;
                 }
-                //Calculating new vehicle position with gridService.calc(src, dir)
-                application_state.set_coordinates(this.gridService.calc(
-                    application_state.coordinates,
-                    direction.value));
+                if(typeof direction.value === 'string'){
+                    console.log("type is string!")
+                    //Append all occured crashes
+                    application_state.set_crash(direction.value);
+                }else{
+                    //Calculating new vehicle position with gridService.calc(src, dir)
+                    application_state.set_coordinates(this.gridService.calc(
+                        application_state.coordinates,
+                        direction.value));
+                }
             }
         } catch (error) {
             console.log("error", error)

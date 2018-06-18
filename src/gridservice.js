@@ -4,15 +4,15 @@ class GridService {
   constructor() {}
 
   calc(pos, dir) {
-    console.log('-----------------');
-    console.log('pos:', pos, 'dir:', dir);
+    // console.log('-----------------');
+    // console.log('pos:', pos, 'dir:', dir);
     let res = [];
 
     res[0] = pos[0] + dir[0];
     res[1] = pos[1] + dir[1];
 
     // return this.position_is_valid(res) ? res : pos;
-    console.log('res:', res);
+    //console.log('res:', res);
     return res;
   }
 
