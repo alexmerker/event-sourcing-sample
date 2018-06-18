@@ -110,11 +110,11 @@ function positionIsValid(pos) {
 
 function updateEventLog(eventLog) {
   let viewEl = document.getElementById('eventLog');
-  viewEl.innerHTML = JSON.stringify(eventLog, undefined, 2);
+  viewEl.innerHTML = JSON.stringify(eventLog.reverse(), undefined, 2);
 }
 
 function updateState(state) {
-  let viewEl = document.getElementById('header');
+  let viewEl = document.getElementById('state');
   viewEl.innerHTML = JSON.stringify(state, undefined, 2);
 }
 
@@ -138,13 +138,13 @@ function moveBusEmoji(newpos) {
   el = document.querySelector('[coords="' + JSON.stringify(newpos) + '"]');
 
   if (el.innerHTML === '') {
+    delete state.reachedLocation;
+    delete state.crash;
     el.innerHTML = '🚌';
   } else if (el.innerHTML === '🚩') {
-    // TODO: new arrival at location
     reachedLocation(el.innerHTML);
     el.innerHTML = el.innerHTML + '🎉' + '🚌';
   } else {
-    // TODO: new crash
     crash(el.innerHTML);
     el.innerHTML = el.innerHTML + '💥' + '🚌';
   }

@@ -18,6 +18,10 @@ body {
   color: #fff;
 }
 
+#state {
+  line-height: 1em;
+}
+
 .leftpanel {
   background: #ccc;
   font-size: 2em;
