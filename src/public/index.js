@@ -110,7 +110,8 @@ function positionIsValid(pos) {
 
 function updateEventLog(eventLog) {
   let viewEl = document.getElementById('eventLog');
-  viewEl.innerHTML = JSON.stringify(eventLog.reverse(), undefined, 2);
+  let reversedEventLog = eventLog.slice(0).reverse();
+  viewEl.innerHTML = JSON.stringify(reversedEventLog, undefined, 2);
 }
 
 function updateState(state) {
@@ -126,31 +127,7 @@ function setState(newState) {
   this.state = newState;
 }
 
-function moveBusEmoji(newpos) {
-  // clear the squares
-  document.querySelectorAll('.square').forEach(square => {
-    square.innerHTML = square.innerHTML.replace('🚌', '');
-    square.innerHTML = square.innerHTML.replace('🎉', '');
-    square.innerHTML = square.innerHTML.replace('💥', '');
-  });
-
-  // set bus at newpos
-  el = document.querySelector('[coords="' + JSON.stringify(newpos) + '"]');
-
-  if (el.innerHTML === '') {
-    delete state.reachedLocation;
-    delete state.crash;
-    el.innerHTML = '🚌';
-  } else if (el.innerHTML === '🚩') {
-    delete state.crash;
-    reachedLocation(el.innerHTML);
-    el.innerHTML = el.innerHTML + '🎉' + '🚌';
-  } else {
-    crash(el.innerHTML);
-    el.innerHTML = el.innerHTML + '💥' + '🚌';
-  }
-  return newpos;
-}
+/*  */
 
 function crash(culprit) {
   state.crash = culprit;
@@ -172,6 +149,14 @@ function teleport(position) {
   addToEventlog({ type: 'teleport', position: position });
 }
 
+function load() {
+  teleport(state.position);
+  moveBusEmoji(state.position);
+  updateEventLog(eventLog);
+  updateState(state);
+}
+
+/* controls */
 function keyboardcontrol(event) {
   console.log(state);
   // console.log(event.which);
@@ -214,13 +199,35 @@ function keyboardcontrol(event) {
 
 document.addEventListener('keydown', keyboardcontrol);
 
-function load() {
-  teleport(state.position);
-  moveBusEmoji(state.position);
-  updateEventLog(eventLog);
-  updateState(state);
+/* render game */
+
+function moveBusEmoji(newpos) {
+  // clear the squares
+  document.querySelectorAll('.square').forEach(square => {
+    square.innerHTML = square.innerHTML.replace('🚌', '');
+    square.innerHTML = square.innerHTML.replace('🎉', '');
+    square.innerHTML = square.innerHTML.replace('💥', '');
+  });
+
+  // set bus at newpos
+  el = document.querySelector('[coords="' + JSON.stringify(newpos) + '"]');
+
+  if (el.innerHTML === '') {
+    delete state.reachedLocation;
+    delete state.crash;
+    el.innerHTML = '🚌';
+  } else if (el.innerHTML === '🚩') {
+    delete state.crash;
+    reachedLocation(el.innerHTML);
+    el.innerHTML = el.innerHTML + '🎉' + '🚌';
+  } else {
+    crash(el.innerHTML);
+    el.innerHTML = el.innerHTML + '💥' + '🚌';
+  }
+  return newpos;
 }
 
+/* helper methods */
 function sleep(milliseconds) {
   var start = new Date().getTime();
   for (var i = 0; i < 1e7; i++) {
