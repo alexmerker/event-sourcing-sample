@@ -11,7 +11,7 @@ document.addEventListener('keydown', function(event) {
   // left
   if (event.which == 37) {
     console.log('left', [-1, 0]);
-    move(getCurrentPosition(), [-1, 0]).then(res => {
+    move([-1, 0]).then(res => {
       const newPosition = res.coordinates;
       moveBusEmoji(newPosition);
       setState(res);
@@ -21,7 +21,7 @@ document.addEventListener('keydown', function(event) {
   // up
   if (event.which == 38) {
     console.log('up', [0, -1]);
-    move(getCurrentPosition(), [0, -1]).then(res => {
+    move([0, -1]).then(res => {
       const newPosition = res.coordinates;
       moveBusEmoji(newPosition);
       setState(res);
@@ -31,7 +31,7 @@ document.addEventListener('keydown', function(event) {
   // right
   if (event.which == 39) {
     console.log('right', [1, 0]);
-    move(getCurrentPosition(), [1, 0]).then(res => {
+    move([1, 0]).then(res => {
       const newPosition = res.coordinates;
       moveBusEmoji(newPosition);
       setState(res);
@@ -41,7 +41,7 @@ document.addEventListener('keydown', function(event) {
   // down
   if (event.which == 40) {
     console.log('down', [0, 1]);
-    move(getCurrentPosition(), [0, 1]).then(res => {
+    move([0, 1]).then(res => {
       const newPosition = res.coordinates;
       moveBusEmoji(newPosition);
       setState(res);
@@ -155,7 +155,7 @@ function getState() {
   });
 }
 
-function move(pos, dir) {
+function move(dir) {
   return new Promise((resolve, reject) => {
     var xmlhttp = new XMLHttpRequest();
 
@@ -172,13 +172,9 @@ function move(pos, dir) {
       }
     };
 
-    console.log('/move/' + JSON.stringify(pos) + '/' + JSON.stringify(dir));
+    console.log('/move/' + JSON.stringify(dir));
 
-    xmlhttp.open(
-      'GET',
-      '/move/' + JSON.stringify(pos) + '/' + JSON.stringify(dir),
-      true
-    );
+    xmlhttp.open('GET', '/move/' + JSON.stringify(dir), true);
     xmlhttp.send();
   });
 }
@@ -252,11 +248,11 @@ function setStartPosition(pos) {
 }
 
 function load() {
-  // start().then(res => {
-  // setState(res);
-  updateEventLog();
-  updateState();
-  setStartPosition([0, 0]);
-  // console.log('state', this.state);
-  // });
+  start().then(res => {
+    setState(res);
+    updateEventLog();
+    // updateState();
+    setStartPosition([0, 0]);
+    // console.log('state', this.state);
+  });
 }

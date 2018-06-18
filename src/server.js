@@ -19,10 +19,9 @@ app.get('/start', (req, res) => {
   res.send(vehicle.get_state());
 });
 
-app.get('/move/:position/:direction', (req, res) => {
+app.get('/move/:direction', (req, res) => {
   let direction = JSON.parse(req.params.direction);
-  let position = JSON.parse(req.params.position);
-  vehicle.move(position, direction);
+  vehicle.move(direction);
   res.send(vehicle.get_state());
 });
 
