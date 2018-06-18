@@ -6,7 +6,6 @@ class GridService {
     }
 
     calc(src, dir){
-        console.log(src,dir)
         let res = [];
 
         res[0] = src[0] + dir[0];

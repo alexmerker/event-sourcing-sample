@@ -1,6 +1,5 @@
 'use strict';
 
-var Eventstore = require('./eventstore');
 var GridService = require('./gridservice');
 var State = require('./state');
 

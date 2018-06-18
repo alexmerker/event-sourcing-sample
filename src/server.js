@@ -7,8 +7,12 @@ app.use(express.static(__dirname + '/public'));
 var Eventstore = require('./eventstore');
 var eventstore = new Eventstore();
 
+var ReplayService = require('./replayservice');
+var replayService = new ReplayService(eventstore);
+
 var Vehicle = require('./vehicle');
 var vehicle = new Vehicle(eventstore, [0, 0]);
+
 
 app.get('/', function(req, res) {
   res.sendfile('index.html');
@@ -32,6 +36,24 @@ app.get('/crash/:culprit', (req, res) => {
   let culprit = req.params.culprit;
   vehicle.crash(culprit);
   res.send('Oh noes');
+});
+
+app.get('/replayState', (req, res) => {
+
+  replayService.replay().then((response) => {
+      res.send(response);
+  }).catch((err) => {
+    res.send(err);
+  })
+});
+
+app.get('/replayState/:time', (req, res) => {
+
+    replayService.replay(req.params.time).then((response) => {
+        res.send(response);
+    }).catch((err) => {
+      res.send(err);
+    })
 });
 
 app.listen(13377);

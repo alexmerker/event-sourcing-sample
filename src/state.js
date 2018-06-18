@@ -12,6 +12,10 @@ class State {
         this.crash = crashed; 
     }
 
+    get_coordinates(){
+        return this.coordinates;
+    }
+
     get_state(){
         return this;
     }
