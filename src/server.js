@@ -7,6 +7,9 @@ app.use(express.static(__dirname + '/public'));
 var Eventstore = require('./eventstore');
 var eventstore = new Eventstore();
 
+var ReplayService = require('./replayservice');
+var replayService = new ReplayService(eventstore);
+
 var Vehicle = require('./vehicle');
 var vehicle = new Vehicle(eventstore, [0, 0]);
 
@@ -15,6 +18,10 @@ app.get('/', function(req, res) {
 });
 
 app.get('/start', (req, res) => {
+  //Cleanup eventstore
+  eventstore.setstore([]);
+  eventstore.reset_timer();
+
   vehicle.start([0, 0]);
   res.send(vehicle.get_state());
 });
@@ -44,9 +51,22 @@ app.get('/reset', (req, res) => {
   res.send(vehicle.get_state());
 });
 
-// app.get('/replay', (req, res) => {
-//   vehicle.replay() eventstore.
-//   res.send(vehicle.get_state());
-// });
+app.get('/replayState', (req, res) => {
+
+  replayService.replay().then((response) => {
+      res.send(response);
+  }).catch((err) => {
+    res.send(err);
+  })
+});
+
+app.get('/replayState/:time', (req, res) => {
+
+    replayService.replay(req.params.time).then((response) => {
+        res.send(response);
+    }).catch((err) => {
+      res.send(err);
+    })
+});
 
 app.listen(13377);

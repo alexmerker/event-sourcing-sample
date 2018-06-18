@@ -15,6 +15,10 @@ class State {
     get_state(){
         return this;
     }
+
+    get_coordinates(){
+        return this.coordinates;
+    }
 }
 
 module.exports = State;
