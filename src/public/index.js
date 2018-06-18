@@ -4,13 +4,13 @@
 
 // current state (how it looks in our DB now)
 var state = {
-  position: [2, 2],
-  crashes: ['🌴', '🚧'],
-  reached_locations: ['🚩']
+  position: [0, 0],
+  crash: [],
+  reachedLocation: []
 };
 
 // past events (should be persisted somewhere)
-var eventLog = [
+var eventLogold = [
   { type: 'teleport', position: [0, 0], time: 0 },
   { type: 'move', step: [1, 0], time: 1 },
   { type: 'crash', culprit: ['🌴'], time: 2 },
@@ -19,8 +19,9 @@ var eventLog = [
   { type: 'move', step: [0, 1], time: 5 },
   { type: 'crash', culprit: ['🚧'], time: 6 },
   { type: 'move', step: [0, 1], time: 7 },
-  { type: 'reached_location', location: '🚩', time: 8 }
+  { type: 'reachedLocation', location: '🚩', time: 8 }
 ];
+var eventLog = [];
 
 // snapshots used to make replays faster (should be persisted somewhere)
 var snapshots = [
@@ -28,7 +29,7 @@ var snapshots = [
     type: 'snapshot',
     state: {
       coordinates: [1, 1],
-      crashes: ['🚧']
+      crashe: ['🚧']
     },
     pointintime: 3
   }
@@ -43,8 +44,8 @@ function replay(events, pointInTime) {
 
   let replayState = {
     position: null,
-    crashes: [],
-    locations: []
+    crash: [],
+    location: []
   };
 
   let time = 0;
@@ -54,11 +55,11 @@ function replay(events, pointInTime) {
       replayState.position = event.position;
       time += 1000;
     } else if (event.type === 'crash') {
-      replayState.crashes.push(event.culprit);
+      crash(event.culprit);
     } else if (event.type === 'move') {
-      replayState.position = move(replayState.position, event.step);
+      replayState;
       time += 1000;
-    } else if (event.type === 'reached_location') {
+    } else if (event.type === 'reachedLocation') {
       replayState.locations.push(event.location);
     }
     animateMove(replayState.position, time);
@@ -66,6 +67,10 @@ function replay(events, pointInTime) {
   });
 
   return replayState;
+}
+
+function addToEventlog(event) {
+  eventLog.push(event);
 }
 
 function animateState(state, delay) {
@@ -88,19 +93,14 @@ function animateMove(position, delay) {
   });
 }
 
-function move(oldpos, step) {
-  const newpos = calc_position(oldpos, step);
-  return position_is_valid(newpos) ? newpos : oldpos;
+function calcPosition(oldpos, step) {
+  let newpos = [];
+  newpos[0] = oldpos[0] + step[0];
+  newpos[1] = oldpos[1] + step[1];
+  return positionIsValid(newpos) ? newpos : oldpos;
 }
 
-function calc_position(pos, step) {
-  let res = [];
-  res[0] = pos[0] + step[0];
-  res[1] = pos[1] + step[1];
-  return res;
-}
-
-function position_is_valid(pos) {
+function positionIsValid(pos) {
   const upper_boundary = 2;
   const lower_boundary = 0;
   const valid_upper = pos[0] <= upper_boundary && pos[1] <= upper_boundary;
@@ -135,15 +135,86 @@ function moveBusEmoji(newpos) {
   });
 
   // set bus at newpos
-  newEl = document.querySelector('[coords="' + JSON.stringify(newpos) + '"]');
+  el = document.querySelector('[coords="' + JSON.stringify(newpos) + '"]');
 
-  if (newEl.innerHTML === '') {
-    newEl.innerHTML = '🚌';
-  } else if (newEl.innerHTML === '🚩') {
-    newEl.innerHTML = newEl.innerHTML + '🎉' + '🚌';
+  if (el.innerHTML === '') {
+    el.innerHTML = '🚌';
+  } else if (el.innerHTML === '🚩') {
+    // TODO: new arrival at location
+    reachedLocation(el.innerHTML);
+    el.innerHTML = el.innerHTML + '🎉' + '🚌';
   } else {
-    newEl.innerHTML = newEl.innerHTML + '💥' + '🚌';
+    // TODO: new crash
+    crash(el.innerHTML);
+    el.innerHTML = el.innerHTML + '💥' + '🚌';
   }
+  return newpos;
+}
+
+function crash(culprit) {
+  state.crash = culprit;
+  addToEventlog({ type: 'crash', culprit: culprit });
+}
+
+function reachedLocation(location) {
+  state.reachedLocation = location;
+  addToEventlog({ type: 'reachedLocation', location: location });
+}
+
+function move(step) {
+  state.position = calcPosition(state.position, step);
+  addToEventlog({ type: 'move', step: step });
+}
+
+function teleport(position) {
+  state.position = position;
+  addToEventlog({ type: 'teleport', position: position });
+}
+
+function keyboardcontrol(event) {
+  console.log(state);
+  // console.log(event.which);
+  if (event.which == 82) {
+    console.log('R');
+  } // esc
+  if (event.which == 32) console.log('space'); // space
+
+  // left
+  if (event.which == 37) {
+    console.log('left', [-1, 0]);
+    move([-1, 0]);
+  }
+
+  // up
+  if (event.which == 38) {
+    console.log('up', [0, -1]);
+    move([0, -1]);
+  }
+
+  // right
+  if (event.which == 39) {
+    console.log('right', [1, 0]);
+    move([1, 0]);
+  }
+
+  // down
+  if (event.which == 40) {
+    console.log('down', [0, 1]);
+    move([0, 1]);
+  }
+
+  moveBusEmoji(state.position);
+  updateEventLog(eventLog);
+  updateState(state);
+}
+
+document.addEventListener('keydown', keyboardcontrol);
+
+function load() {
+  teleport(state.position);
+  moveBusEmoji(state.position);
+  updateEventLog(eventLog);
+  updateState(state);
 }
 
 function sleep(milliseconds) {
@@ -154,39 +225,3 @@ function sleep(milliseconds) {
     }
   }
 }
-
-function doMove(step) {
-  moveBusEmoji(move(state.position, step));
-}
-
-document.addEventListener('keydown', function(event) {
-  // console.log(event.which);
-  if (event.which == 82) {
-    console.log('R');
-  } // esc
-  if (event.which == 32) console.log('space'); // space
-
-  // left
-  if (event.which == 37) {
-    console.log('left', [-1, 0]);
-    doMove([-1, 0]);
-  }
-
-  // up
-  if (event.which == 38) {
-    console.log('up', [0, -1]);
-    doMove([0, -1]);
-  }
-
-  // right
-  if (event.which == 39) {
-    console.log('right', [1, 0]);
-    doMove([1, 0]);
-  }
-
-  // down
-  if (event.which == 40) {
-    console.log('down', [0, 1]);
-    doMove([0, 1]);
-  }
-});
