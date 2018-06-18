@@ -18,10 +18,16 @@ app.get('/', function(req, res) {
   res.sendfile('index.html');
 });
 
-app.get('/move/:direction', (req, res) => {
+app.get('/start', (req, res) => {
+  vehicle.start([0, 0]);
+  res.send(vehicle.get_state());
+});
+
+app.get('/move/:position/:direction', (req, res) => {
   let direction = JSON.parse(req.params.direction);
-  vehicle.move(direction);
-  res.send('Drivin along');
+  let position = JSON.parse(req.params.position);
+  vehicle.move(position, direction);
+  res.send(vehicle.get_state());
 });
 
 app.get('/get-events', (req, res) => {
@@ -35,7 +41,7 @@ app.get('/get-state', (req, res) => {
 app.get('/crash/:culprit', (req, res) => {
   let culprit = req.params.culprit;
   vehicle.crash(culprit);
-  res.send('Oh noes');
+  res.send(vehicle.get_state());
 });
 
 app.get('/replayState', (req, res) => {
@@ -55,5 +61,14 @@ app.get('/replayState/:time', (req, res) => {
       res.send(err);
     })
 });
+app.get('/reset', (req, res) => {
+  vehicle.reset();
+  res.send(vehicle.get_state());
+});
+
+// app.get('/replay', (req, res) => {
+//   vehicle.replay() eventstore.
+//   res.send(vehicle.get_state());
+// });
 
 app.listen(13377);

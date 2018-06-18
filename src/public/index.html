@@ -10,49 +10,31 @@
 
 <body onload="load()">
     <div id="wrapper">
-        <div class="header">
-            <input type="range" min="1" max="100" value="50" class="slider" id="myRange">
+        <div id="header" class="header">
+            <!-- <input type="range" min="1" max="100" value="50" class="slider" id="myRange"> -->
         </div>
         <div>
             <div class="leftpanel">
                 <div class="container">
                     <div class="row">
-                        <div class="square" coords="[0,0]">
-                            [0,0] 💥🚌
-                        </div>
-                        <div class="square" coords="[1,0]">
-                            [1,0]
-                        </div>
-                        <div class="square" coords="[2,0]">
-                            [2,0] 🧟
-                        </div>
+                        <div class="square" coords="[0,0]"></div>
+                        <div class="square" coords="[1,0]"></div>
+                        <div class="square" coords="[2,0]">🧟</div>
                     </div>
                     <div class="row">
-                        <div class="square" coords="[0,1]">
-                            [0,1]
-                        </div>
-                        <div class="square" coords="[1,1]">
-                            [1,1] 🚧
-                        </div>
-                        <div class="square" coords="[2,1]">
-                            [2,1]
-                        </div>
+                        <div class="square" coords="[0,1]"></div>
+                        <div class="square" coords="[1,1]">🚧</div>
+                        <div class="square" coords="[2,1]"></div>
                     </div>
                     <div class="row">
-                        <div class="square" coords="[0,2]">
-                            [0,2]
-                        </div>
-                        <div class="square" coords="[1,2]">
-                            [1,2] 🌴
-                        </div>
-                        <div class="square" coords="[2,2]">
-                            [2,2]
-                        </div>
+                        <div class="square" coords="[0,2]"></div>
+                        <div class="square" coords="[1,2]">🌴</div>
+                        <div class="square" coords="[2,2]">🚩</div>
                     </div>
-
                 </div>
             </div>
-            <div class="rightpanel">Events Store curr state
+            <div class="rightpanel">
+                <pre id="eventLog"></pre>
             </div>
         </div>
     </div>

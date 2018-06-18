@@ -15,6 +15,7 @@ class Vehicle {
   start(coords) {
     //Persist application state (memory)
     this.state.set_coordinates(coords);
+
     const event = {
       coordinates: coords
     };
@@ -23,16 +24,21 @@ class Vehicle {
     this.eventstore.log('start', event);
   }
 
-  move(dir) {
-    //Calculate and persist new application state (memory)
-    this.state.set_coordinates(this.gridsrv.calc(this.state.coordinates, dir));
+  move(pos, dir) {
+    //Calculate new position
+    const newpos = this.gridsrv.calc(pos, dir);
+    // move if in boundaries
+    if (this.gridsrv.position_is_valid(newpos)) {
+      // Persist new application state (memory)
+      this.state.set_coordinates(this.gridsrv.calc(pos, dir));
 
-    const event = {
-      direction: dir
-    };
+      const event = {
+        direction: dir
+      };
 
-    //Persist event to the eventstore
-    this.eventstore.log('move', event);
+      //Persist event to the eventstore
+      this.eventstore.log('move', event);
+    }
   }
 
   crash(culprit) {
@@ -50,6 +56,19 @@ class Vehicle {
   get_state() {
     return this.state.get_state();
   }
+
+  reset() {
+    this.state = new State();
+    this.state.set_coordinates([0, 0]);
+  }
+
+  // replay(eventlog) {
+  //   for (const event in eventlog) {
+  //     if event.type === "move"
+  //       move(event.state_change)
+
+  //   }
+  // }
 }
 
 module.exports = Vehicle;
