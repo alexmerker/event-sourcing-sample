@@ -108,15 +108,6 @@ function position_is_valid(pos) {
   return valid_lower && valid_upper;
 }
 
-document.addEventListener('keydown', function(event) {
-  // console.log(event.which);
-  if (event.which == 82) {
-    console.log('R');
-    // updateState()
-  } // esc
-  if (event.which == 32) console.log('space'); // space
-});
-
 function updateEventLog(eventLog) {
   let viewEl = document.getElementById('eventLog');
   viewEl.innerHTML = JSON.stringify(eventLog, undefined, 2);
@@ -155,10 +146,6 @@ function moveBusEmoji(newpos) {
   }
 }
 
-function setStartPosition(pos) {
-  moveBusEmoji(pos, [0, 0]);
-}
-
 function sleep(milliseconds) {
   var start = new Date().getTime();
   for (var i = 0; i < 1e7; i++) {
@@ -167,3 +154,39 @@ function sleep(milliseconds) {
     }
   }
 }
+
+function doMove(step) {
+  moveBusEmoji(move(state.position, step));
+}
+
+document.addEventListener('keydown', function(event) {
+  // console.log(event.which);
+  if (event.which == 82) {
+    console.log('R');
+  } // esc
+  if (event.which == 32) console.log('space'); // space
+
+  // left
+  if (event.which == 37) {
+    console.log('left', [-1, 0]);
+    doMove([-1, 0]);
+  }
+
+  // up
+  if (event.which == 38) {
+    console.log('up', [0, -1]);
+    doMove([0, -1]);
+  }
+
+  // right
+  if (event.which == 39) {
+    console.log('right', [1, 0]);
+    doMove([1, 0]);
+  }
+
+  // down
+  if (event.which == 40) {
+    console.log('down', [0, 1]);
+    doMove([0, 1]);
+  }
+});
