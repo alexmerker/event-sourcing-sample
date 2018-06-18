@@ -13,7 +13,6 @@ var replayService = new ReplayService(eventstore);
 var Vehicle = require('./vehicle');
 var vehicle = new Vehicle(eventstore, [0, 0]);
 
-
 app.get('/', function(req, res) {
   res.sendfile('index.html');
 });
@@ -44,22 +43,32 @@ app.get('/crash/:culprit', (req, res) => {
   res.send(vehicle.get_state());
 });
 
-app.get('/replayState', (req, res) => {
+app.get('/reachedDestination/:location', (req, res) => {
+  let location = req.params.location;
+  vehicle.reachedDestination(location);
+  res.send(vehicle.get_state());
+});
 
-  replayService.replay().then((response) => {
+app.get('/replayState', (req, res) => {
+  replayService
+    .replay()
+    .then(response => {
       res.send(response);
-  }).catch((err) => {
-    res.send(err);
-  })
+    })
+    .catch(err => {
+      res.send(err);
+    });
 });
 
 app.get('/replayState/:time', (req, res) => {
-
-    replayService.replay(req.params.time).then((response) => {
-        res.send(response);
-    }).catch((err) => {
-      res.send(err);
+  replayService
+    .replay(req.params.time)
+    .then(response => {
+      res.send(response);
     })
+    .catch(err => {
+      res.send(err);
+    });
 });
 app.get('/reset', (req, res) => {
   vehicle.reset();

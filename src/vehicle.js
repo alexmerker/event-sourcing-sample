@@ -53,6 +53,18 @@ class Vehicle {
     this.eventstore.log('crash', event);
   }
 
+  reachedDestination(destination) {
+    //Persist application state (memory) - vehicle has crashed!
+    this.state.set_reached_destination(destination);
+
+    const event = {
+      destination: destination
+    };
+
+    //Persist event to the eventstore
+    this.eventstore.log('reachedDestination', event);
+  }
+
   get_state() {
     return this.state.get_state();
   }

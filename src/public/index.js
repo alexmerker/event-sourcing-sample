@@ -98,6 +98,10 @@ function moveBusEmoji(newpos) {
   if (newEl.innerHTML === '') {
     newEl.innerHTML = '🚌';
   } else if (newEl.innerHTML === '🚩') {
+    reachedDestination(newEl.innerHTML).then(res => {
+      updateEventLog();
+      updateState();
+    });
     newEl.innerHTML = newEl.innerHTML + '🎉' + '🚌';
   } else {
     crash(newEl.innerHTML).then(res => {
@@ -205,6 +209,28 @@ function crash(culprit) {
   });
 }
 
+function reachedDestination(destination) {
+  return new Promise((resolve, reject) => {
+    var xmlhttp = new XMLHttpRequest();
+
+    xmlhttp.onreadystatechange = function() {
+      if (xmlhttp.readyState == XMLHttpRequest.DONE) {
+        // XMLHttpRequest.DONE == 4
+        if (xmlhttp.status == 200) {
+          resolve(JSON.parse(xmlhttp.responseText));
+        } else if (xmlhttp.status == 400) {
+          reject('400');
+        } else {
+          reject('unknown error');
+        }
+      }
+    };
+
+    xmlhttp.open('GET', '/reachedDestination/' + destination, true);
+    xmlhttp.send();
+  });
+}
+
 function start() {
   return new Promise((resolve, reject) => {
     var xmlhttp = new XMLHttpRequest();
@@ -226,7 +252,7 @@ function start() {
   });
 }
 
-function resetVehicle() {
+function resetAll() {
   return new Promise((resolve, reject) => {
     var xmlhttp = new XMLHttpRequest();
 
@@ -252,11 +278,10 @@ function setStartPosition(pos) {
 }
 
 function load() {
-  // start().then(res => {
-  // setState(res);
-  updateEventLog();
-  updateState();
-  setStartPosition([0, 0]);
-  // console.log('state', this.state);
-  // });
+  resetAll().then(res => {
+    setState(res);
+    updateEventLog();
+    setStartPosition([0, 0]);
+    // console.log('state', this.state);
+  });
 }

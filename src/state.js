@@ -1,24 +1,27 @@
-"use strict"
+'use strict';
 
 class State {
-    constructor(){
-    }
+  constructor() {}
 
-    set_coordinates(coords){
-        this.coordinates = coords;
-    }
+  set_coordinates(coords) {
+    this.coordinates = coords;
+  }
 
-    set_crash(crashed){
-        this.crash = crashed; 
-    }
+  set_crash(crashed) {
+    this.crash = crashed;
+  }
 
-    get_coordinates(){
-        return this.coordinates;
-    }
+  set_reached_destination(destination) {
+    this.reachedDestination = destination;
+  }
 
-    get_state(){
-        return this;
-    }
+  get_coordinates() {
+    return this.coordinates;
+  }
+
+  get_state() {
+    return this;
+  }
 }
 
 module.exports = State;
