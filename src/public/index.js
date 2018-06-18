@@ -142,6 +142,7 @@ function moveBusEmoji(newpos) {
     delete state.crash;
     el.innerHTML = '🚌';
   } else if (el.innerHTML === '🚩') {
+    delete state.crash;
     reachedLocation(el.innerHTML);
     el.innerHTML = el.innerHTML + '🎉' + '🚌';
   } else {
@@ -183,27 +184,30 @@ function keyboardcontrol(event) {
   if (event.which == 37) {
     console.log('left', [-1, 0]);
     move([-1, 0]);
+    moveBusEmoji(state.position);
   }
 
   // up
   if (event.which == 38) {
     console.log('up', [0, -1]);
     move([0, -1]);
+    moveBusEmoji(state.position);
   }
 
   // right
   if (event.which == 39) {
     console.log('right', [1, 0]);
     move([1, 0]);
+    moveBusEmoji(state.position);
   }
 
   // down
   if (event.which == 40) {
     console.log('down', [0, 1]);
     move([0, 1]);
+    moveBusEmoji(state.position);
   }
 
-  moveBusEmoji(state.position);
   updateEventLog(eventLog);
   updateState(state);
 }
