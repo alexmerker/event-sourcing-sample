@@ -1,6 +1,6 @@
 var state = { coordinates: [0, 0] };
 
-document.addEventListener('keydown', function (event) {
+document.addEventListener('keydown', function(event) {
   // console.log(event.which);
   if (event.which == 82) {
     console.log('R');
@@ -115,8 +115,7 @@ function getReplayData(time) {
   return new Promise((resolve, reject) => {
     if (time === undefined) {
       resolve(getReplay());
-    }
-    else {
+    } else {
       resolve(getReplayAtTime(time));
     }
   });
@@ -146,7 +145,6 @@ function getReplayData(time) {
 //       }));
 //     });
 
-
 //   })
 // }
 
@@ -154,7 +152,7 @@ function getEvents() {
   return new Promise((resolve, reject) => {
     var xmlhttp = new XMLHttpRequest();
 
-    xmlhttp.onreadystatechange = function () {
+    xmlhttp.onreadystatechange = function() {
       if (xmlhttp.readyState == XMLHttpRequest.DONE) {
         // XMLHttpRequest.DONE == 4
         if (xmlhttp.status == 200) {
@@ -176,7 +174,7 @@ function getState() {
   return new Promise((resolve, reject) => {
     var xmlhttp = new XMLHttpRequest();
 
-    xmlhttp.onreadystatechange = function () {
+    xmlhttp.onreadystatechange = function() {
       if (xmlhttp.readyState == XMLHttpRequest.DONE) {
         // XMLHttpRequest.DONE == 4
         if (xmlhttp.status == 200) {
@@ -198,7 +196,7 @@ function move(dir) {
   return new Promise((resolve, reject) => {
     var xmlhttp = new XMLHttpRequest();
 
-    xmlhttp.onreadystatechange = function () {
+    xmlhttp.onreadystatechange = function() {
       if (xmlhttp.readyState == XMLHttpRequest.DONE) {
         // XMLHttpRequest.DONE == 4
         if (xmlhttp.status == 200) {
@@ -222,7 +220,7 @@ function crash(culprit) {
   return new Promise((resolve, reject) => {
     var xmlhttp = new XMLHttpRequest();
 
-    xmlhttp.onreadystatechange = function () {
+    xmlhttp.onreadystatechange = function() {
       if (xmlhttp.readyState == XMLHttpRequest.DONE) {
         // XMLHttpRequest.DONE == 4
         if (xmlhttp.status == 200) {
@@ -244,7 +242,7 @@ function start() {
   return new Promise((resolve, reject) => {
     var xmlhttp = new XMLHttpRequest();
 
-    xmlhttp.onreadystatechange = function () {
+    xmlhttp.onreadystatechange = function() {
       if (xmlhttp.readyState == XMLHttpRequest.DONE) {
         if (xmlhttp.status == 200) {
           resolve(JSON.parse(xmlhttp.responseText));
@@ -265,7 +263,7 @@ function resetVehicle() {
   return new Promise((resolve, reject) => {
     var xmlhttp = new XMLHttpRequest();
 
-    xmlhttp.onreadystatechange = function () {
+    xmlhttp.onreadystatechange = function() {
       if (xmlhttp.readyState == XMLHttpRequest.DONE) {
         if (xmlhttp.status == 200) {
           resolve(JSON.parse(xmlhttp.responseText));
@@ -286,7 +284,7 @@ function getReplayAtTime(timer) {
   return new Promise((resolve, reject) => {
     var xmlhttp = new XMLHttpRequest();
 
-    xmlhttp.onreadystatechange = function () {
+    xmlhttp.onreadystatechange = function() {
       if (xmlhttp.readyState == XMLHttpRequest.DONE) {
         if (xmlhttp.status == 200) {
           resolve(JSON.parse(xmlhttp.responseText));
@@ -307,7 +305,7 @@ function getReplay() {
   return new Promise((resolve, reject) => {
     var xmlhttp = new XMLHttpRequest();
 
-    xmlhttp.onreadystatechange = function () {
+    xmlhttp.onreadystatechange = function() {
       if (xmlhttp.readyState == XMLHttpRequest.DONE) {
         if (xmlhttp.status == 200) {
           resolve(JSON.parse(xmlhttp.responseText));
@@ -331,6 +329,8 @@ function setStartPosition(pos) {
 function load() {
   start().then(res => {
     setState(res);
+    console.log(res);
+
     updateEventLog();
     // updateState();
     setStartPosition([0, 0]);

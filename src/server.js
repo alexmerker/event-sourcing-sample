@@ -22,6 +22,7 @@ app.get('/start', (req, res) => {
   eventstore.setstore([]);
   eventstore.reset_timer();
 
+  vehicle.reset();
   vehicle.start([0, 0]);
   res.send(vehicle.get_state());
 });
@@ -52,21 +53,25 @@ app.get('/reset', (req, res) => {
 });
 
 app.get('/replayState', (req, res) => {
-
-  replayService.replay().then((response) => {
+  replayService
+    .replay()
+    .then(response => {
       res.send(response);
-  }).catch((err) => {
-    res.send(err);
-  })
+    })
+    .catch(err => {
+      res.send(err);
+    });
 });
 
 app.get('/replayState/:time', (req, res) => {
-
-    replayService.replay(req.params.time).then((response) => {
-        res.send(response);
-    }).catch((err) => {
-      res.send(err);
+  replayService
+    .replay(req.params.time)
+    .then(response => {
+      res.send(response);
     })
+    .catch(err => {
+      res.send(err);
+    });
 });
 
 app.listen(13377);
