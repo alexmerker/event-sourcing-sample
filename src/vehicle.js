@@ -54,7 +54,7 @@ class Vehicle {
   }
 
   reachedDestination(destination) {
-    //Persist application state (memory) - vehicle has crashed!
+    //Persist application state (memory) - vehicle has reached its destionation!
     this.state.set_reached_destination(destination);
 
     const event = {
