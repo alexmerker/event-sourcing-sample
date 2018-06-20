@@ -7,13 +7,11 @@ class State {
 
   set_position(coords) {
     this.position = coords;
-
     persist()
   }
 
   set_crash(crashed) {
     this.crash = crashed;
-
     persist()
   }
 
