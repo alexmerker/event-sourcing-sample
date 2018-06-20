@@ -29,6 +29,10 @@ class Eventstore{
     setstore(store){
         this.store = store;
     }
+
+    reset_timer(){
+        this.time = 0;
+    }
 }
 
 module.exports = Eventstore;

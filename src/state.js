@@ -1,26 +1,28 @@
 'use strict';
 
 class State {
-  constructor() {}
+    constructor(){
+        this.crash = [];
+    }
 
   set_coordinates(coords) {
     this.coordinates = coords;
-  }
-
-  set_crash(crashed) {
-    this.crash = crashed;
   }
 
   set_reached_destination(destination) {
     this.reachedDestination = destination;
   }
 
-  get_coordinates() {
-    return this.coordinates;
+  set_crash(crashed){
+      this.crash.push(crashed); 
   }
 
-  get_state() {
-    return this;
+  get_state(){
+      return this;
+  }
+
+  get_coordinates(){
+      return this.coordinates;
   }
 }
 

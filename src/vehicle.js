@@ -24,13 +24,14 @@ class Vehicle {
     this.eventstore.log('start', event);
   }
 
-  move(pos, dir) {
+  move(dir) {
     //Calculate new position
-    const newpos = this.gridsrv.calc(pos, dir);
+    const oldpos = this.state.coordinates;
+    const newpos = this.gridsrv.calc(oldpos, dir);
     // move if in boundaries
     if (this.gridsrv.position_is_valid(newpos)) {
       // Persist new application state (memory)
-      this.state.set_coordinates(this.gridsrv.calc(pos, dir));
+      this.state.set_coordinates(newpos);
 
       const event = {
         direction: dir

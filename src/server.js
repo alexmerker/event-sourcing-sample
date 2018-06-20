@@ -18,14 +18,18 @@ app.get('/', function(req, res) {
 });
 
 app.get('/start', (req, res) => {
+  //Cleanup eventstore
+  eventstore.setstore([]);
+  eventstore.reset_timer();
+
+  vehicle.reset();
   vehicle.start([0, 0]);
   res.send(vehicle.get_state());
 });
 
-app.get('/move/:position/:direction', (req, res) => {
+app.get('/move/:direction', (req, res) => {
   let direction = JSON.parse(req.params.direction);
-  let position = JSON.parse(req.params.position);
-  vehicle.move(position, direction);
+  vehicle.move(direction);
   res.send(vehicle.get_state());
 });
 
@@ -75,9 +79,26 @@ app.get('/reset', (req, res) => {
   res.send(vehicle.get_state());
 });
 
-// app.get('/replay', (req, res) => {
-//   vehicle.replay() eventstore.
-//   res.send(vehicle.get_state());
-// });
+app.get('/replayState', (req, res) => {
+  replayService
+    .replay()
+    .then(response => {
+      res.send(response);
+    })
+    .catch(err => {
+      res.send(err);
+    });
+});
+
+app.get('/replayState/:time', (req, res) => {
+  replayService
+    .replay(req.params.time)
+    .then(response => {
+      res.send(response);
+    })
+    .catch(err => {
+      res.send(err);
+    });
+});
 
 app.listen(13377);
