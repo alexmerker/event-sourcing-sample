@@ -47,12 +47,6 @@ class ReplayService {
                     return(application_state);
                     break;
                 }
-<<<<<<< HEAD
-                //Calculating new vehicle position with gridService.calc(src, dir)
-                application_state.set_coordinates(this.gridService.calc(
-                    application_state.coordinates,
-                    direction.value));
-=======
                 if(typeof direction.value === 'string'){
                     console.log("type is string!")
                     //Append all occured crashes
@@ -63,7 +57,6 @@ class ReplayService {
                         application_state.coordinates,
                         direction.value));
                 }
->>>>>>> bugfix
             }
         } catch (error) {
             console.log("error", error)
