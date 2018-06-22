@@ -9,9 +9,10 @@
 </head>
 
 <body onload="load()">
+    <div id="result"></div>
     <div id="wrapper">
         <div id="header" class="header">
-            <!-- <input type="range" min="1" max="100" value="50" class="slider" id="myRange"> -->
+            <div id="state"></div>
         </div>
         <div>
             <div class="leftpanel">
@@ -19,21 +20,24 @@
                     <div class="row">
                         <div class="square" coords="[0,0]"></div>
                         <div class="square" coords="[1,0]"></div>
-                        <div class="square" coords="[2,0]">🧟</div>
+                        <div class="square" coords="[2,0]">🚧</div>
                     </div>
                     <div class="row">
-                        <div class="square" coords="[0,1]"></div>
-                        <div class="square" coords="[1,1]">🚧</div>
+                        <div class="square" coords="[0,1]">🌴</div>
+                        <div class="square" coords="[1,1]">🧟</div>
                         <div class="square" coords="[2,1]"></div>
                     </div>
                     <div class="row">
                         <div class="square" coords="[0,2]"></div>
-                        <div class="square" coords="[1,2]">🌴</div>
+                        <div class="square" coords="[1,2]"></div>
                         <div class="square" coords="[2,2]">🚩</div>
                     </div>
                 </div>
             </div>
             <div class="rightpanel">
+                <button style="position: absolute; top: 0; right: 0; bottom: 0; width: 120px; height: 2em; margin: 30px" id="replay" onclick="replay(eventLog)">replay</button>
+                <!-- <input type="number" name="time" id=""> -->
+                <!-- <input type="range" min="1" max="100" value="50" class="slider" id="myRange"> -->
                 <pre id="eventLog"></pre>
             </div>
         </div>

@@ -11,21 +11,26 @@ body {
 
 .header {
   background: rgb(80, 80, 80);
-  padding: 15px;
+  padding: 30px;
   text-align: center;
   font-size: 18px;
   font-family: sans-serif;
   color: #fff;
 }
 
+#state {
+  font-size: 3em;
+  line-height: 1em;
+}
+
 .leftpanel {
   background: #ccc;
-  font-size: 2em;
+  font-size: 6em;
 }
 
 .rightpanel {
   padding: 20px;
-  font-size: 0.7rem;
+  font-size: 2em;
   background: #666;
   color: #fff;
   overflow: scroll;
@@ -103,6 +108,7 @@ body {
 }
 
 .square {
+  border: solid 1px rgba(255, 255, 255, 0.7);
   background-color: #cacaca;
   -webkit-flex: 4;
   -moz-flex: 4;
@@ -155,4 +161,25 @@ body {
   border-radius: 50%;
   background: tomato;
   cursor: pointer;
+}
+
+input,
+button {
+  display: inline-block;
+  padding: 0.3em 1.2em;
+  margin: 0 0.1em 0.1em 0;
+  border-radius: 2em;
+  box-sizing: border-box;
+  text-decoration: none;
+  font-size: 0.8em;
+  font-family: 'Roboto', sans-serif;
+  font-weight: 300;
+  color: #ffffff;
+  background-color: #4eb5f1;
+  text-align: center;
+  transition: all 0.2s;
+}
+
+button:hover {
+  background-color: #4095c6;
 }

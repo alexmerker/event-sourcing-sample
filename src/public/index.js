@@ -1,81 +1,96 @@
-var state = { coordinates: [0, 0] };
+// Eventsourcing
 
-document.addEventListener('keydown', function(event) {
-  // console.log(event.which);
-  if (event.which == 82) {
-    console.log('R');
-    resetVehicle().then(res => setState(res));
-  } // esc
-  if (event.which == 32) console.log('space'); // space
+// current state (how it looks in our DB now)
+var state = {
+  position: [0, 0]
+  // crash: [],
+  // reachedLocation: []
+};
 
-  // left
-  if (event.which == 37) {
-    console.log('left', [-1, 0]);
-    move([-1, 0]).then(res => {
-      const newPosition = res.coordinates;
-      moveBusEmoji(newPosition);
-      setState(res);
-    });
+// past events (should be persisted somewhere)
+var eventLog = [];
+
+// snapshots used to make replays faster (should be persisted somewhere)
+var snapshots = [
+  {
+    type: 'snapshot',
+    state: {
+      coordinates: [1, 1],
+      crashe: ['🚧']
+    },
+    pointintime: 3
+  }
+];
+
+// inital load function called by onload on <body>
+function load() {
+  state = addToEventlog(state, teleport(state.position), applyTeleport);
+  moveBusEmoji(state.position);
+  updateEventLog(eventLog);
+  updateState(state);
+}
+
+// complete rebuild (creates a projection state over the eventlog up to a particular point in time)
+function replay(events, pointInTime) {
+  console.log(pointInTime);
+  if (typeof pointInTime === 'undefined') {
+    pointInTime = events.length;
   }
 
-  // up
-  if (event.which == 38) {
-    console.log('up', [0, -1]);
-    move([0, -1]).then(res => {
-      const newPosition = res.coordinates;
-      moveBusEmoji(newPosition);
-      setState(res);
-    });
-  }
+  // reset state
+  state = {};
 
-  // right
-  if (event.which == 39) {
-    console.log('right', [1, 0]);
-    move([1, 0]).then(res => {
-      const newPosition = res.coordinates;
-      moveBusEmoji(newPosition);
-      setState(res);
-    });
-  }
+  let time = 0;
 
-  // down
-  if (event.which == 40) {
-    console.log('down', [0, 1]);
-    move([0, 1]).then(res => {
-      const newPosition = res.coordinates;
-      moveBusEmoji(newPosition);
-      setState(res);
-    });
-  }
-});
+  events.slice(0, pointInTime).forEach(event => {
+    console.log(state);
+    console.log(event);
 
-function updateEventLog() {
+    if (event.type === 'teleport') {
+      state = replayEvent(state, event, applyTeleport);
+      time += 1000;
+    } else if (event.type === 'crash') {
+      state = replayEvent(state, event, applyCrash);
+    } else if (event.type === 'move') {
+      state = replayEvent(state, event, applyMove);
+      time += 1000;
+    } else if (event.type === 'reachedLocation') {
+      state = replayEvent(state, event, applyReachedLocation);
+    }
+
+    // run timed animations
+    animateMove(state.position, time);
+    animateState(state, time);
+  });
+}
+
+function calcPosition(oldpos, step) {
+  let newpos = [];
+  newpos[0] = oldpos[0] + step[0];
+  newpos[1] = oldpos[1] + step[1];
+  return positionIsValid(newpos) ? newpos : oldpos;
+}
+
+function positionIsValid(pos) {
+  const upper_boundary = 2;
+  const lower_boundary = 0;
+  const valid_upper = pos[0] <= upper_boundary && pos[1] <= upper_boundary;
+  const valid_lower = pos[0] >= lower_boundary && pos[1] >= lower_boundary;
+  return valid_lower && valid_upper;
+}
+
+function updateEventLog(eventLog) {
   let viewEl = document.getElementById('eventLog');
-  getEvents().then(res => {
-    console.log('getlog', viewEl);
-    viewEl.innerHTML = JSON.stringify(res.reverse(), undefined, 2);
-  });
+  let reversedEventLog = eventLog.slice(0).reverse();
+  viewEl.innerHTML = JSON.stringify(reversedEventLog, undefined, 2);
 }
 
-function updateState() {
-  let viewEl = document.getElementById('header');
-  getState().then(res => {
-    console.log('getstate', res);
-    viewEl.innerHTML = JSON.stringify(res, undefined, 2);
-  });
+function updateState(state) {
+  let viewEl = document.getElementById('state');
+  viewEl.innerHTML = JSON.stringify(state, undefined, 2);
 }
 
-// function scrollIntoView() {
-//   var elem = document.getElementById('eventLog');
-//   console.log('elem', elem);
-
-//   elem.scrollIntoView({ block: 'end' });
-//   // window.scrollTo(0, document.querySelector('.eventLog').scrollHeight);
-// }
-
-function getCurrentPosition(newState) {
-  console.log(this.state.coordinates);
-
+function getCurrentPosition() {
   return this.state.coordinates;
 }
 
@@ -83,283 +98,154 @@ function setState(newState) {
   this.state = newState;
 }
 
-function moveBusEmoji(newpos) {
-  const oldpos = this.state.coordinates;
-  console.log(oldpos, newpos);
-
-  oldEl = document.querySelector('[coords="' + JSON.stringify(oldpos) + '"]');
-
-  oldEl.innerHTML = oldEl.innerHTML.replace('🚌', '');
-  oldEl.innerHTML = oldEl.innerHTML.replace('🎉', '');
-  oldEl.innerHTML = oldEl.innerHTML.replace('💥', '');
-
-  newEl = document.querySelector('[coords="' + JSON.stringify(newpos) + '"]');
-
-  if (newEl.innerHTML === '') {
-    newEl.innerHTML = '🚌';
-  } else if (newEl.innerHTML === '🚩') {
-    reachedDestination(newEl.innerHTML).then(res => {
-      updateEventLog();
-      updateState();
-    });
-    newEl.innerHTML = newEl.innerHTML + '🎉' + '🚌';
-  } else {
-    crash(newEl.innerHTML).then(res => {
-      updateEventLog();
-      updateState();
-    });
-    newEl.innerHTML = newEl.innerHTML + '💥' + '🚌';
-  }
-
-  updateEventLog();
-  updateState();
+function addToEventlog(state, event, applyToStateCallback) {
+  event.time = eventLog.length + 1;
+  eventLog.push(event);
+  const newState = applyToStateCallback(state, event);
+  return newState;
 }
 
-function getReplayData(time) {
-  return new Promise((resolve, reject) => {
-    if (time === undefined) {
-      resolve(getReplay());
-    } else {
-      resolve(getReplayAtTime(time));
-    }
-  });
+function replayEvent(state, event, applyToStateCallback) {
+  const newState = applyToStateCallback(state, event);
+  return newState;
 }
 
-// function animateReplay(time) {
-//   getReplayData(time).then((data) => {
-//     if (data === undefined) {
-//       time = data.length;
-//     }
-//     return new Promise((resolve, reject) => {
-//       let evstore = this.events;
-//       resolve(this._animateReplay(function* iterable() {
+/* vehicle api */
 
-//         //Fill with move values
-//         for (let i = 1; i < time; i++) {
-//           //data.
-
-//           // let el = evstore[i].state_change.direction;
-//           // let cr = evstore[i].state_change.culprit;
-//           // if (el) {
-//           //   yield el;
-//           // } else if (cr) {
-//           //   yield cr;
-//           // }
-//         }
-//       }));
-//     });
-
-//   })
-// }
-
-function getEvents() {
-  return new Promise((resolve, reject) => {
-    var xmlhttp = new XMLHttpRequest();
-
-    xmlhttp.onreadystatechange = function() {
-      if (xmlhttp.readyState == XMLHttpRequest.DONE) {
-        // XMLHttpRequest.DONE == 4
-        if (xmlhttp.status == 200) {
-          resolve(JSON.parse(xmlhttp.responseText));
-        } else if (xmlhttp.status == 400) {
-          reject('400');
-        } else {
-          reject('unknown error');
-        }
-      }
-    };
-
-    xmlhttp.open('GET', '/get-events', true);
-    xmlhttp.send();
-  });
-}
-
-function getState() {
-  return new Promise((resolve, reject) => {
-    var xmlhttp = new XMLHttpRequest();
-
-    xmlhttp.onreadystatechange = function() {
-      if (xmlhttp.readyState == XMLHttpRequest.DONE) {
-        // XMLHttpRequest.DONE == 4
-        if (xmlhttp.status == 200) {
-          resolve(JSON.parse(xmlhttp.responseText));
-        } else if (xmlhttp.status == 400) {
-          reject('400');
-        } else {
-          reject('unknown error');
-        }
-      }
-    };
-
-    xmlhttp.open('GET', '/get-state', true);
-    xmlhttp.send();
-  });
-}
-
-function move(dir) {
-  return new Promise((resolve, reject) => {
-    var xmlhttp = new XMLHttpRequest();
-
-    xmlhttp.onreadystatechange = function() {
-      if (xmlhttp.readyState == XMLHttpRequest.DONE) {
-        // XMLHttpRequest.DONE == 4
-        if (xmlhttp.status == 200) {
-          resolve(JSON.parse(xmlhttp.responseText));
-        } else if (xmlhttp.status == 400) {
-          reject('400');
-        } else {
-          reject('unknown error');
-        }
-      }
-    };
-
-    console.log('/move/' + JSON.stringify(dir));
-
-    xmlhttp.open('GET', '/move/' + JSON.stringify(dir), true);
-    xmlhttp.send();
-  });
+function applyCrash(state, event) {
+  state.crash = event.culprit;
+  return state;
 }
 
 function crash(culprit) {
-  return new Promise((resolve, reject) => {
-    var xmlhttp = new XMLHttpRequest();
+  state.crash = culprit;
+  const event = { type: 'crash', culprit: culprit };
+  return event;
+}
 
-    xmlhttp.onreadystatechange = function() {
-      if (xmlhttp.readyState == XMLHttpRequest.DONE) {
-        // XMLHttpRequest.DONE == 4
-        if (xmlhttp.status == 200) {
-          resolve(JSON.parse(xmlhttp.responseText));
-        } else if (xmlhttp.status == 400) {
-          reject('400');
-        } else {
-          reject('unknown error');
-        }
-      }
-    };
+function applyReachedLocation(state, event) {
+  console.log(state, event);
 
-    xmlhttp.open('GET', '/crash/' + culprit, true);
-    xmlhttp.send();
+  state.reachedLocation = event.location;
+  return state;
+}
+
+function reachedLocation(location) {
+  state.reachedLocation = location;
+  const event = { type: 'reachedLocation', location: location };
+  return event;
+}
+
+function applyMove(state, event) {
+  state.position = calcPosition(state.position, event.step);
+  return state;
+}
+
+function move(step) {
+  const event = { type: 'move', step: step };
+  return event;
+}
+
+function applyTeleport(state, event) {
+  state.position = event.position;
+  return state;
+}
+
+function teleport(position) {
+  return { type: 'teleport', position: position };
+}
+
+/* keyboard controls */
+
+function keyboardcontrol(event) {
+  // left
+  if (event.which == 37) {
+    console.log('left', [-1, 0]);
+    state = addToEventlog(state, move([-1, 0]), applyMove);
+    moveBusEmoji(state.position);
+  }
+
+  // up
+  if (event.which == 38) {
+    console.log('up', [0, -1]);
+    state = addToEventlog(state, move([0, -1]), applyMove);
+    moveBusEmoji(state.position);
+  }
+
+  // right
+  if (event.which == 39) {
+    console.log('right', [1, 0]);
+    state = addToEventlog(state, move([1, 0]), applyMove);
+    moveBusEmoji(state.position);
+  }
+
+  // down
+  if (event.which == 40) {
+    console.log('down', [0, 1]);
+    state = addToEventlog(state, move([0, 1]), applyMove);
+    moveBusEmoji(state.position);
+  }
+
+  updateEventLog(eventLog);
+  updateState(state);
+}
+
+document.addEventListener('keydown', keyboardcontrol);
+
+/* render game */
+function moveBusEmoji(newpos) {
+  console.log(newpos);
+
+  // clear the squares
+  document.querySelectorAll('.square').forEach(square => {
+    square.innerHTML = square.innerHTML.replace('🚌', '');
+    square.innerHTML = square.innerHTML.replace('🎉', '');
+    square.innerHTML = square.innerHTML.replace('💥', '');
+  });
+
+  // set bus at newpos
+  el = document.querySelector('[coords="' + JSON.stringify(newpos) + '"]');
+
+  if (el.innerHTML === '') {
+    el.innerHTML = '🚌';
+  } else if (el.innerHTML === '🚩') {
+    state = addToEventlog(
+      state,
+      reachedLocation(el.innerHTML),
+      applyReachedLocation
+    );
+    el.innerHTML = el.innerHTML + '🎉' + '🚌';
+  } else {
+    state = addToEventlog(state, crash(el.innerHTML), applyCrash);
+    el.innerHTML = el.innerHTML + '💥' + '🚌';
+  }
+  return newpos;
+}
+
+function animateState(state, delay) {
+  const _state = Object.assign({}, state);
+  let timedPromise = new Promise((resolve, reject) => {
+    let wait = setTimeout(() => {
+      updateState(_state);
+    }, delay);
   });
 }
 
-function reachedDestination(destination) {
-  return new Promise((resolve, reject) => {
-    var xmlhttp = new XMLHttpRequest();
-
-    xmlhttp.onreadystatechange = function() {
-      if (xmlhttp.readyState == XMLHttpRequest.DONE) {
-        // XMLHttpRequest.DONE == 4
-        if (xmlhttp.status == 200) {
-          resolve(JSON.parse(xmlhttp.responseText));
-        } else if (xmlhttp.status == 400) {
-          reject('400');
-        } else {
-          reject('unknown error');
-        }
-      }
-    };
-
-    xmlhttp.open('GET', '/reachedDestination/' + destination, true);
-    xmlhttp.send();
+function animateMove(position, delay) {
+  let timedPromise = new Promise((resolve, reject) => {
+    let wait = setTimeout(() => {
+      console.log('moved', position);
+      moveBusEmoji(position);
+    }, delay);
   });
 }
 
-function start() {
-  return new Promise((resolve, reject) => {
-    var xmlhttp = new XMLHttpRequest();
-
-    xmlhttp.onreadystatechange = function() {
-      if (xmlhttp.readyState == XMLHttpRequest.DONE) {
-        if (xmlhttp.status == 200) {
-          resolve(JSON.parse(xmlhttp.responseText));
-        } else if (xmlhttp.status == 400) {
-          reject('400');
-        } else {
-          reject('unknown error');
-        }
-      }
-    };
-
-    xmlhttp.open('GET', '/start', true);
-    xmlhttp.send();
-  });
-}
-
-function resetAll() {
-  return new Promise((resolve, reject) => {
-    var xmlhttp = new XMLHttpRequest();
-
-    xmlhttp.onreadystatechange = function() {
-      if (xmlhttp.readyState == XMLHttpRequest.DONE) {
-        if (xmlhttp.status == 200) {
-          resolve(JSON.parse(xmlhttp.responseText));
-        } else if (xmlhttp.status == 400) {
-          reject('400');
-        } else {
-          reject('unknown error');
-        }
-      }
-    };
-
-    xmlhttp.open('GET', '/reset', true);
-    xmlhttp.send();
-  });
-}
-
-function getReplayAtTime(timer) {
-  return new Promise((resolve, reject) => {
-    var xmlhttp = new XMLHttpRequest();
-
-    xmlhttp.onreadystatechange = function() {
-      if (xmlhttp.readyState == XMLHttpRequest.DONE) {
-        if (xmlhttp.status == 200) {
-          resolve(JSON.parse(xmlhttp.responseText));
-        } else if (xmlhttp.status == 400) {
-          reject('400');
-        } else {
-          reject('unknown error');
-        }
-      }
-    };
-
-    xmlhttp.open('GET', '/replayState/' + timer, true);
-    xmlhttp.send();
-  });
-}
-
-function getReplay() {
-  return new Promise((resolve, reject) => {
-    var xmlhttp = new XMLHttpRequest();
-
-    xmlhttp.onreadystatechange = function() {
-      if (xmlhttp.readyState == XMLHttpRequest.DONE) {
-        if (xmlhttp.status == 200) {
-          resolve(JSON.parse(xmlhttp.responseText));
-        } else if (xmlhttp.status == 400) {
-          reject('400');
-        } else {
-          reject('unknown error');
-        }
-      }
-    };
-
-    xmlhttp.open('GET', '/replayState', true);
-    xmlhttp.send();
-  });
-}
-
-function setStartPosition(pos) {
-  moveBusEmoji(pos, [0, 0]);
-}
-
-function load() {
-  start().then(res => {
-    setState(res);
-    console.log(res);
-
-    updateEventLog();
-    // updateState();
-    setStartPosition([0, 0]);
-    // console.log('state', this.state);
-  });
+/* helper methods */
+function sleep(milliseconds) {
+  var start = new Date().getTime();
+  for (var i = 0; i < 1e7; i++) {
+    if (new Date().getTime() - start > milliseconds) {
+      break;
+    }
+  }
 }
