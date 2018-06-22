@@ -163,9 +163,9 @@ function replayEvent(state, event, applyToStateCallback) {
 
 /*  */
 
-function applyCrash(_state, event) {
-  _state.crash = event.culprit;
-  return _state;
+function applyCrash(state, event) {
+  state.crash = event.culprit;
+  return state;
 }
 
 function crash(culprit) {
@@ -198,8 +198,6 @@ function move(step) {
 }
 
 function applyTeleport(state, event) {
-  console.log(event);
-
   state.position = event.position;
   return state;
 }
