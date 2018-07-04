@@ -1,7 +1,10 @@
 # event-sourcing-sample
 
+A little game to show how event sourcing works. 
 
-## Install
+It shows the current application state and the event log which can be replayed.
+
+## ![screen](screen.png)Install
 
 ```
 $ npm install
