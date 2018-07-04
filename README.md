@@ -17,4 +17,4 @@ $ npm install
 $ cd event-sourcing-sample/src
 $ node server.js
 ```
-open http://localhost:13377
+server running on http://localhost:5000
